@@ -1,3 +1,7 @@
+
+## 0.2.1
+
+- Include built `dist/*` artifacts for Git-based package consumers.
 # Changelog
 
 All notable changes to `@vaos/sdk` will be documented in this file.
