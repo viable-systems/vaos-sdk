@@ -1,6 +1,6 @@
 {
   "name": "@vaos/sdk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Runtime SDK for wiring VAOS autonomy kernel into application services",
   "license": "MIT",
   "private": false,
