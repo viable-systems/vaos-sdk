@@ -3,8 +3,15 @@ import {
   AutonomyLedgerService,
   AutonomyLeaseManager,
   AutonomyTickEngine,
+  InMemoryAutonomyRepository,
+  buildDeterminismReceipt,
+  verifyDeterminismReceipt,
   type AutonomyRepository,
-  type AutonomyTickEngineOptions
+  type AutonomyStream,
+  type AutonomyTickEngineOptions,
+  type BuildDeterminismReceiptInput,
+  type DeterminismReceipt,
+  type VerifyDeterminismReceiptResult
 } from '@vaos/dak-core'
 
 export interface CreateDakRuntimeInput {
@@ -28,6 +35,31 @@ export interface DakRuntime {
   runTick: AutonomyTickEngine['runTick']
   processRunnableStreams: AutonomyTickEngine['processRunnableStreams']
   inspectStream: AutonomyIntrospectionService['inspectStream']
+}
+
+export interface InMemoryDakRuntime extends Omit<DakRuntime, 'repository'> {
+  repository: InMemoryAutonomyRepository
+}
+
+export interface RunTickWithReceiptInput {
+  runtime: DakRuntime
+  streamId: string
+  tickId: string
+  signingSecret?: string
+  engineVersion?: string
+}
+
+export interface RunTickWithReceiptResult {
+  result: Awaited<ReturnType<DakRuntime['runTick']>>
+  receipt: DeterminismReceipt
+}
+
+export interface VerifyStreamReceiptInput {
+  runtime: DakRuntime
+  stream: AutonomyStream
+  tickId: string
+  receipt: DeterminismReceipt
+  signingSecret?: string
 }
 
 export function createDakRuntime(input: CreateDakRuntimeInput): DakRuntime {
@@ -58,4 +90,54 @@ export function createDakRuntime(input: CreateDakRuntimeInput): DakRuntime {
     processRunnableStreams: tickEngine.processRunnableStreams.bind(tickEngine),
     inspectStream: introspection.inspectStream.bind(introspection)
   }
+}
+
+export function createInMemoryDakRuntime(input: Omit<CreateDakRuntimeInput, 'repository'> = {}): InMemoryDakRuntime {
+  const repository = new InMemoryAutonomyRepository()
+  return createDakRuntime({
+    ...input,
+    repository
+  }) as InMemoryDakRuntime
+}
+
+export async function runTickWithReceipt(input: RunTickWithReceiptInput): Promise<RunTickWithReceiptResult> {
+  const result = await input.runtime.runTick({
+    streamId: input.streamId,
+    tickId: input.tickId
+  })
+
+  const stream = await input.runtime.repository.getStream(input.streamId)
+  if (!stream) {
+    throw new Error(`Stream not found for receipt: ${input.streamId}`)
+  }
+
+  const events = await input.runtime.repository.getEvents(input.streamId)
+  const snapshot = await input.runtime.repository.getLatestSnapshot(input.streamId)
+
+  const receiptInput: BuildDeterminismReceiptInput = {
+    stream,
+    events,
+    tickId: input.tickId,
+    snapshot,
+    engineVersion: input.engineVersion,
+    signingSecret: input.signingSecret
+  }
+
+  return {
+    result,
+    receipt: buildDeterminismReceipt(receiptInput)
+  }
+}
+
+export async function verifyStreamReceipt(input: VerifyStreamReceiptInput): Promise<VerifyDeterminismReceiptResult> {
+  const events = await input.runtime.repository.getEvents(input.stream.id)
+  const snapshot = await input.runtime.repository.getLatestSnapshot(input.stream.id)
+
+  return verifyDeterminismReceipt(input.receipt, {
+    stream: input.stream,
+    events,
+    tickId: input.tickId,
+    snapshot,
+    signingSecret: input.signingSecret
+  })
 }

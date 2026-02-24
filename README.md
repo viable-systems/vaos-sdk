@@ -1,28 +1,32 @@
 # @vaos/sdk
 
-Runtime SDK that wires `@vaos/dak-core` services into application code.
+Runtime SDK for composing `@vaos/dak-core` into application code.
 
-## Scope
+## Features
 
-- `createDakRuntime(input)` factory
-- typed handles for:
-  - `runTick`
-  - `processRunnableStreams`
-  - `inspectStream`
-  - direct service access (`ledger`, `leaseManager`, `tickEngine`, `introspection`)
+- `createDakRuntime` factory
+- `createInMemoryDakRuntime` for local development/testing
+- `runTickWithReceipt` convenience API
+- `verifyStreamReceipt` verification API
 
 ## Install
 
 ```bash
-npm install @vaos/sdk
+npm install @vaos/sdk @vaos/dak-core
 ```
 
-## Build
+## Development
 
 ```bash
+npm install
+npm run typecheck
+npm run test
 npm run build
 ```
 
-## License
+## Examples
 
-MIT
+```bash
+npm run example:basic
+npm run example:receipt
+```

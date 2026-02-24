@@ -1,18 +1,17 @@
 {
   "name": "@vaos/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Runtime SDK for wiring VAOS autonomy kernel into application services",
   "license": "MIT",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/viable-systems/vaos.git",
-    "directory": "packages/sdk"
+    "url": "https://github.com/viable-systems/vaos-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/viable-systems/vaos/issues"
+    "url": "https://github.com/viable-systems/vaos-sdk/issues"
   },
-  "homepage": "https://github.com/viable-systems/vaos/tree/master/packages/sdk",
+  "homepage": "https://github.com/viable-systems/vaos-sdk",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -25,14 +24,32 @@
   "files": [
     "dist",
     "README.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "docs",
+    "examples",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md"
   ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --clean --tsconfig tsconfig.build.json",
-    "prepublishOnly": "npm run build"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example:basic": "tsx examples/basic-runtime.ts",
+    "example:receipt": "tsx examples/receipt-flow.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
   },
-  "dependencies": {
-    "@vaos/dak-core": "^0.1.0"
+  "peerDependencies": {
+    "@vaos/dak-core": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "@vaos/dak-core": "github:viable-systems/vaos-dak-core#main",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.7"
   }
 }
