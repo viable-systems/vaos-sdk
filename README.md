@@ -22,7 +22,10 @@ npm install
 npm run typecheck
 npm run test
 npm run build
+npm run dogfood:supabase
 ```
+
+`dogfood:supabase` expects `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to be set, and writes `artifacts/supabase-dogfood-sdk.json`.
 
 ## Examples
 
